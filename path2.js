@@ -143,7 +143,7 @@ function redraw(timestamp) {
 
     for (let s of sprites) {
         context.drawImage(spriteStrip, Math.floor(s.frame)*spriteStrip.width/s.frames, 0,
-            spriteStrip.height, spriteStrip.height,
+            spriteStrip.width, spriteStrip.height,
             s.x-s.r, s.y-s.r, s.r*2, s.r*2);
     }
 
