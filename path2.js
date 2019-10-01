@@ -1,9 +1,8 @@
 let w = 0, h = 0;
 const backdrop = new Image();
 const spriteStrip = new Image();
-const spriteFrames = 8;
 
-let balls = [];
+let sprites = [];
 let markers = [];
 
 function fixSize() {
@@ -26,7 +25,7 @@ function pageLoad() {
     spriteStrip.src = "sonic.png";
     window.requestAnimationFrame(redraw);
 
-    setInterval(addBall, 1000);
+    setInterval(addSprite, 1000);
 
     const canvas = document.getElementById('pathCanvas');
 
@@ -71,18 +70,19 @@ function removeMarker() {
 
 
 
-function addBall() {
+function addSprite() {
 
     let x = markers[0].x;
     let y = markers[0].y;
     let r = 30;
     let v = 250;
     let frame = 0;
+    let frames = 8;
 
     let nextMarker = 1;
     let progress = 0;
 
-    balls.push({x, y, r, v, frame, nextMarker, progress});
+    sprites.push({x, y, r, v, frame, frames, nextMarker, progress});
 
 }
 
@@ -101,28 +101,28 @@ function redraw(timestamp) {
     const frameLength = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
 
-    for (let b of balls) {
+    for (let s of sprites) {
 
-        if (b.nextMarker >= markers.length) continue;
+        if (s.nextMarker >= markers.length) continue;
 
-        let n = b.nextMarker;
-        b.x = markers[n-1].x + (markers[n].x - markers[n-1].x) * b.progress;
-        b.y = markers[n-1].y + (markers[n].y - markers[n-1].y) * b.progress;
+        let n = s.nextMarker;
+        s.x = markers[n-1].x + (markers[n].x - markers[n-1].x) * s.progress;
+        s.y = markers[n-1].y + (markers[n].y - markers[n-1].y) * s.progress;
 
-        b.progress += frameLength * b.v / markers[n].d;
-        if (b.progress >= 1) {
-            b.nextMarker++;
-            b.progress = 0;
+        s.progress += frameLength * s.v / markers[n].d;
+        if (s.progress >= 1) {
+            s.nextMarker++;
+            s.progress = 0;
         }
 
-        b.frame += frameLength*10;
-        if (b.frame >= spriteFrames) b.frame = 0;
+        s.frame += frameLength*10;
+        if (s.frame >= s.frames) s.frame = 0;
 
     }
 
-    while (balls.length > 0) {
-        if (balls[0].nextMarker < markers.length) break;
-        balls.shift();
+    while (sprites.length > 0) {
+        if (sprites[0].nextMarker < markers.length) break;
+        sprites.shift();
     }
 
     context.strokeStyle = 'blue';
@@ -141,10 +141,10 @@ function redraw(timestamp) {
         lastMarker = marker;
     }
 
-    for (let b of balls) {
-        context.drawImage(spriteStrip, Math.floor(b.frame)*spriteStrip.width/spriteFrames, 0,
+    for (let s of sprites) {
+        context.drawImage(spriteStrip, Math.floor(s.frame)*spriteStrip.width/s.frames, 0,
             spriteStrip.height, spriteStrip.height,
-            b.x-b.r, b.y-b.r, b.r*2, b.r*2);
+            s.x-s.r, s.y-s.r, s.r*2, s.r*2);
     }
 
     window.requestAnimationFrame(redraw);
