@@ -18,7 +18,7 @@ function pageLoad() {
     fixSize();
 
     markers.push({x: 50, y: h/2});
-    markers.push({x: w-50, y: h/2});
+    markers.push({x: w-50, y: h/2, d: w-100});
 
     ballImage.src = "ball.png";
     ballImage.onload = () => window.requestAnimationFrame(redraw);
@@ -43,26 +43,39 @@ function addBall() {
 	let x = markers[0].x;
 	let y = markers[0].y;
 	let r = 30;
+    let v = 250;
 
 	let nextMarker = 1;
 	let progress = 0;
 
-	balls.push({x, y, r, nextMarker, progress});
+	balls.push({x, y, r, v, nextMarker, progress});
 
+}
+
+function separation(b1, b2) {
+    return Math.sqrt(Math.pow(b1.x - b2.x, 2) + Math.pow(b1.y - b2.y, 2));
 }
 
 function addMarker(x, y) {
 
-    let lastMarker = markers.pop();
-    markers.push({x, y});
-    markers.push(lastMarker);
+    let markerAfter = markers.pop();
+    let markerBefore = markers[markers.length - 1];
+
+    let d = separation(markerBefore, {x, y});
+    markers.push({x, y, d});
+
+    markerAfter.d = separation({x, y}, markerAfter);
+    markers.push(markerAfter);
 
 }
 
 function removeMarker() {
 
     if (markers.length <= 2) return;
+
     markers.splice(markers.length - 2, 1);
+
+    markers[markers.length - 1].d = separation(markers[markers.length - 1], markers[markers.length - 2]);
 
 }
 
@@ -88,12 +101,10 @@ function redraw(timestamp) {
     	b.x = markers[n-1].x + (markers[n].x - markers[n-1].x) * b.progress;
     	b.y = markers[n-1].y + (markers[n].y - markers[n-1].y) * b.progress;
 
-        let d = Math.sqrt(Math.pow( markers[n].x - markers[n-1].x, 2) + Math.pow(markers[n].y - markers[n-1].y, 2));
-
-        b.progress += frameLength * 100/d;
+        b.progress += frameLength * b.v / markers[n].d;
  	    if (b.progress >= 1) {
  			b.nextMarker++;
- 			b.progress -= 1;
+ 			b.progress = 0;
         }
 
     }
@@ -122,8 +133,6 @@ function redraw(timestamp) {
     for (let b of balls) {
        context.drawImage(ballImage, 0,0, ballImage.width, ballImage.height, b.x-b.r, b.y-b.r, b.r*2, b.r*2);
     }
-
-
 
     window.requestAnimationFrame(redraw);
 
