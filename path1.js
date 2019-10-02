@@ -60,30 +60,6 @@ function redraw(timestamp) {
     lastTimestamp = timestamp;
 
     for (let s of sprites) {
-
-    	if (s.nextMarker >= markers.length) continue;
-
-    	let n = s.nextMarker;
-    	s.x = markers[n-1].x + (markers[n].x - markers[n-1].x) * s.progress;
-    	s.y = markers[n-1].y + (markers[n].y - markers[n-1].y) * s.progress;
-
-    	s.progress += frameLength * s.v / markers[n].d;
-    	if (s.progress >= 1) {
-    			s.nextMarker++;
-    			s.progress = 0;
-        }
-
-          s.frame += frameLength*10;
-          if (s.frame >= s.frames) s.frame = 0;
-
-    }
-
-    while (sprites.length > 0) {
-        if (sprites[0].nextMarker < markers.length) break;
-        sprites.shift();
-    }
-
-    for (let s of sprites) {
         context.drawImage(spriteStrip,
             Math.floor(s.frame)*spriteStrip.width/s.frames, 0,
             spriteStrip.width/s.frames, spriteStrip.height,
